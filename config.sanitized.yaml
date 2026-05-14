@@ -6,103 +6,147 @@ openai_fallback_models:
   - gpt-4o
   - o3
 fallback_providers:
+  - provider: openai-codex
+    model: gpt-5.5
+    tier: gpt_auth
+  - provider: openai-codex
+    model: gpt-5.4
+    tier: gpt_auth
+  - provider: openai-codex
+    model: gpt-5.4-mini
+    tier: gpt_auth
+  - provider: openai-codex
+    model: gpt-5.4-nano
+    tier: gpt_auth
+  - provider: ollama
+    model: qwen3.5:cloud
+    tier: ollama
+  - provider: ollama
+    model: kimi-k2.5
+    tier: ollama
+  - provider: ollama
+    model: glm-5.1
+    tier: ollama
+  - provider: ollama
+    model: minimax-m2.7
+    tier: ollama
+  - provider: openrouter
+    model: deepseek/deepseek-v4-flash
+    tier: openrouter_budget
+  - provider: openrouter
+    model: deepseek/deepseek-v3.2
+    tier: openrouter_budget
+  - provider: openrouter
+    model: qwen/qwen3.6-flash
+    tier: openrouter_budget
+  - provider: openrouter
+    model: deepseek/deepseek-v3.2
+    tier: openrouter_smart
+  - provider: openrouter
+    model: qwen/qwen3.6-35b-a3b
+    tier: openrouter_smart
+  - provider: openrouter
+    model: deepseek/deepseek-v4-flash
+    tier: openrouter_smart
+  - provider: openrouter
+    model: qwen/qwen3.6-35b-a3b
+    tier: openrouter_build
+  - provider: openrouter
+    model: qwen/qwen3.6-plus
+    tier: openrouter_build
+  - provider: openrouter
+    model: moonshotai/kimi-k2.6
+    tier: openrouter_build
 routing:
   auto_workhorse:
-    - embed
-    - QMD
+  - embed
+  - QMD
   budget:
     monthly_hard_cap_usd: 25.0
     daily_target_usd: 0.7
-    daily_hard_cap_usd: 0.95
+    daily_hard_cap_usd: 1.0
     premium_monthly_cap_usd: 3.0
     premium_daily_cap_usd: 0.25
+    intensive_daily_hard_cap_usd: 3.0
   cutoffs:
     disable_kimi_glm_at: 0.5
     budget_only_at: 0.7
     disable_all_openrouter_at: 0.95
   forbidden:
-    - reasoning=high
-    - full_logs_in_prompt
-    - full_repo_context
-    - full_qmd_dumps
-    - repeated_diagnostics_loops
-    - auto_premium
+  - reasoning=high
+  - full_logs_in_prompt
+  - full_repo_context
+  - full_qmd_dumps
+  - repeated_diagnostics_loops
+  - auto_premium
   retry:
     max_retries: 1
     on_exhaustion: fallback_or_stop
-
+  premium_manual_only:
+  - anthropic/claude-sonnet-4.6
+  - google/gemini-3.1-pro-preview
+  - anthropic/claude-opus-4.7
 onboarding:
   seen:
     busy_input_prompt: true
-
-
 security:
   redact_secrets: true
   tirith_enabled: true
-
 privacy:
   redact_pii: true
-
 approvals:
   destructive_slash_confirm: false
   mode: smart
-
 compression:
   enabled: true
-  threshold: 0.50
-  target_ratio: 0.20
+  threshold: 0.5
+  target_ratio: 0.2
   summary_model: kimi-k2.5
-
 delegation:
   max_concurrent_children: 5
   max_spawn_depth: 3
   orchestrator_enabled: true
-
 hooks:
   on_session_start:
-    - skill: persistent-brain
+  - skill: persistent-brain
   on_task_complete:
-    - skill: post-task-finalizer
-    - qmd_update: true
-
+  - skill: post-task-finalizer
+  - qmd_update: true
 curator:
   auto_patch_enabled: true
   max_patches_per_run: 3
   llm_provider: main
-  schedule: "every 6h"
-
+  schedule: every 6h
 checkpoints:
   enabled: true
   max_snapshots: 50
-
 mcp_sampling:
   max_rpm: 30
   max_tokens_cap: 8192
   max_tool_rounds: 10
-
 mcp_servers:
   supabase:
     command: npx
     args:
-      - -y
-      - "@supabase/mcp-server-supabase@latest"
-      - "--access-token"
-      - "${SUPABASE_ACCESS_TOKEN}"
+    - -y
+    - '@supabase/mcp-server-supabase@latest'
+    - --access-token
+    - ${SUPABASE_ACCESS_TOKEN}
     env:
       npm_config_cache: /workspace/.hermes/.npm
     enabled: true
-    connect_timeout: 15
+    connect_timeout: 30
     timeout: 60
   github:
     command: npx
     args:
-      - -y
-      - "@modelcontextprotocol/server-github"
+    - -y
+    - '@modelcontextprotocol/server-github'
     env:
       GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
       npm_config_cache: /workspace/.hermes/.npm
     enabled: true
-    connect_timeout: 15
+    connect_timeout: 30
     timeout: 120
     tools:
       resources: false
@@ -110,46 +154,45 @@ mcp_servers:
   filesystem:
     command: npx
     args:
-      - -y
-      - "@modelcontextprotocol/server-filesystem"
-      - "/workspace"
+    - -y
+    - '@modelcontextprotocol/server-filesystem'
+    - /workspace
     env:
       npm_config_cache: /workspace/.hermes/.npm
     enabled: true
-    connect_timeout: 15
+    connect_timeout: 30
     timeout: 60
   playwright:
     command: npx
     args:
-      - -y
-      - "@playwright/mcp"
+    - -y
+    - '@playwright/mcp'
     env:
       npm_config_cache: /workspace/.hermes/.npm
     enabled: true
-    connect_timeout: 15
+    connect_timeout: 30
     timeout: 120
   memory:
     command: npx
     args:
-      - -y
-      - "@modelcontextprotocol/server-memory@latest"
+    - -y
+    - '@modelcontextprotocol/server-memory@latest'
     env:
       npm_config_cache: /workspace/.hermes/.npm
       MEMORY_FILE_PATH: /workspace/.hermes/mcp-memory.json
     enabled: true
-    connect_timeout: 15
+    connect_timeout: 30
     timeout: 60
   sequential-thinking:
     command: npx
     args:
-      - -y
-      - "@modelcontextprotocol/server-sequential-thinking@latest"
+    - -y
+    - '@modelcontextprotocol/server-sequential-thinking@latest'
     env:
       npm_config_cache: /workspace/.hermes/.npm
     enabled: true
-    connect_timeout: 15
+    connect_timeout: 30
     timeout: 120
-  
 plugins:
   enabled:
-    - webstudio
+  - webstudio
